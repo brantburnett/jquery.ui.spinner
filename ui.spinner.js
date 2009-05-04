@@ -1,6 +1,6 @@
 (function($) {
 
-$.widget("ui.spinbuttons", {
+$.widget("ui.spinner", {
 	_init: function() {
 		var self = this, // shortcut
 			input = self.element,
@@ -10,12 +10,12 @@ $.widget("ui.spinbuttons", {
 			newLimit;
 		
 		if ((input.get(0).tagName != "INPUT") || (input.attr("type") != "text")) {
-			console.error("Invalid target for ui.spinbuttons");
+			console.error("Invalid target for ui.spinner");
 			return;
 		}
 		
 		// ensure that min is less than or equal to max
-		if (min && max && min > max)
+		if ((min != null) && (max != null) && min > max)
 			self._setData('min', min = max);
 
 		// fix min/max based on maxlength of the input
@@ -49,8 +49,8 @@ $.widget("ui.spinbuttons", {
 			rightMargin = options.oMargin = getMargin(input.css("margin-right")), // store original width and right margin for later destroy
 			wrapper = self.wrapper = input.css({ width: (options.oWidth = (box ? input.width() : input.outerWidth())) - buttonWidth, 
 												 marginRight: rightMargin + buttonWidth, textAlign: 'right' })
-				.after('<span class="ui-spinbuttons ui-widget"></span>').next(),
-			btnContainer = self.btnContainer = $('<div class="ui-spinbuttons-buttons"><div class="ui-spinbuttons-up ui-spinbuttons-button ui-state-default ui-corner-tr"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div><div class="ui-spinbuttons-down ui-spinbuttons-button ui-state-default ui-corner-br"><span class="ui-icon ui-icon-triangle-1-s">&nbsp;</span></div></div>'),
+				.after('<span class="ui-spinner ui-widget"></span>').next(),
+			btnContainer = self.btnContainer = $('<div class="ui-spinner-buttons"><div class="ui-spinner-up ui-spinner-button ui-state-default ui-corner-tr"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div><div class="ui-spinner-down ui-spinner-button ui-state-default ui-corner-br"><span class="ui-icon ui-icon-triangle-1-s">&nbsp;</span></div></div>'),
 			upButton, downButton,
 			hoverDelay,
 			hoverDelayCallback,
@@ -83,7 +83,7 @@ $.widget("ui.spinbuttons", {
 			// add an extra pixel in IE
 			top: (input.offset().top - wrapper.offset().top + ($.browser.msie ? 0 : 0)) + 'px' }));
 		
-		buttons = self.buttons = btnContainer.find('.ui-spinbuttons-button');
+		buttons = self.buttons = btnContainer.find('.ui-spinner-button');
 		buttons.css({ width: buttonWidth - (box ? buttons.outerWidth() - buttons.width() : 0), height: height/2 - (box ? buttons.outerHeight() - buttons.height() : 0) });
 		
 		// fix icon centering
@@ -415,8 +415,8 @@ $.widget("ui.spinbuttons", {
 	}	
 });
 
-$.extend($.ui.spinbuttons, {
-	version: "1.0",
+$.extend($.ui.spinner, {
+	version: "1.01",
 	getter: "getValue",
 	defaults: {
 		min: null,
