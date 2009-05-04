@@ -35,6 +35,7 @@
 			$('#enable').click(function() { $('#spinbuttondisable').spinbuttons("enable"); });
 			$('#disable').click(function() { $('#spinbuttondisable').spinbuttons("disable"); });
 			$('#GetValue').click(function() { alert($('#spinbutton').spinbuttons("getValue")); });
+			$('#destroy').click(function() { $('#spinbutton').spinbuttons("destroy"); });
 		});
 	</script>
 </head>
@@ -57,5 +58,7 @@
 			<td><input type="text" class="spinbutton" maxlength="2" value="0" /></td>
 		</tr>
 	</table>
+	
+	<p><input type="button" id="destroy" value="Test Destroy" /></p>
 </body>
 </html>

@@ -3,24 +3,24 @@
 $.widget("ui.spinbuttons", {
 	_init: function() {
 		var self = this, // shortcut
-			input = self.element;
+			input = self.element,
+			min = self._getData('min'),
+			max = self._getData('max'),
+			maxlength = input.get(0).maxLength,
+			newLimit;
 		
 		if ((input.get(0).tagName != "INPUT") || (input.attr("type") != "text")) {
 			console.error("Invalid target for ui.spinbuttons");
 			return;
 		}
 		
-		var min = self._getData('min'),
-			max = self._getData('max'),
-			maxlength = input.get(0).maxLength;
-			
 		// ensure that min is less than or equal to max
 		if (min && max && min > max)
 			self._setData('min', min = max);
 
 		// fix min/max based on maxlength of the input
 		if (maxlength) {
-			var newLimit = Math.pow(10, maxlength) - 1;
+			newLimit = Math.pow(10, maxlength) - 1;
 			if ((max == null) || (max > newLimit))
 				self._setData('max', newLimit);
 			newLimit = -(newLimit + 1) / 10 + 1;
@@ -46,8 +46,9 @@ $.widget("ui.spinbuttons", {
 			buttonWidth = options.width,
 			box = $.support.boxModel,
 			height = input.outerHeight(),
-			rightMargin = getMargin(input.css("margin-right")),
-			wrapper = self.wrapper = input.css({ width: (box ? input.width() : input.outerWidth()) - buttonWidth, marginRight: rightMargin + buttonWidth, textAlign: 'right' })
+			rightMargin = options.oMargin = getMargin(input.css("margin-right")), // store original width and right margin for later destroy
+			wrapper = self.wrapper = input.css({ width: (options.oWidth = (box ? input.width() : input.outerWidth())) - buttonWidth, 
+												 marginRight: rightMargin + buttonWidth, textAlign: 'right' })
 				.after('<span class="ui-spinbuttons ui-widget"></span>').next(),
 			btnContainer = self.btnContainer = $('<div class="ui-spinbuttons-buttons"><div class="ui-spinbuttons-up ui-spinbuttons-button ui-state-default ui-corner-tr"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div><div class="ui-spinbuttons-down ui-spinbuttons-button ui-state-default ui-corner-br"><span class="ui-icon ui-icon-triangle-1-s">&nbsp;</span></div></div>'),
 			upButton, downButton,
@@ -57,13 +58,22 @@ $.widget("ui.spinbuttons", {
 			focused = false,
 			inKeyDown = false,
 			inMouseDown = false,
+			buttons, icons, showOn,
+			keyDir, // stores direction key press is currently spinning
+			rtl = input.get(0).dir == "rtl", // used to reverse left/right key directions
+			
 			// constant shortcuts
 			active = 'ui-state-active',
 			hover = 'ui-state-hover',
-			up = $.ui.keyCode.UP,
-			down = $.ui.keyCode.DOWN,
-			pageUp = $.ui.keyCode.PAGE_UP,
-			pageDown = $.ui.keyCode.PAGE_DOWN,
+			keyCode = $.ui.keyCode, // better minimization
+			up = keyCode.UP,
+			down = keyCode.DOWN,
+			right = keyCode.RIGHT,
+			left = keyCode.LEFT,
+			pageUp = keyCode.PAGE_UP,
+			pageDown = keyCode.PAGE_DOWN,
+			home = keyCode.HOME,
+			end = keyCode.END,
 			msie = $.browser.msie;
 			
 		if (className) wrapper.addClass(className);
@@ -73,16 +83,16 @@ $.widget("ui.spinbuttons", {
 			// add an extra pixel in IE
 			top: (input.offset().top - wrapper.offset().top + ($.browser.msie ? 0 : 0)) + 'px' }));
 		
-		var buttons = self.buttons = btnContainer.find('.ui-spinbuttons-button');
+		buttons = self.buttons = btnContainer.find('.ui-spinbuttons-button');
 		buttons.css({ width: buttonWidth - (box ? buttons.outerWidth() - buttons.width() : 0), height: height/2 - (box ? buttons.outerHeight() - buttons.height() : 0) });
 		
 		// fix icon centering
-		var icons = buttons.find('.ui-icon');
+		icons = buttons.find('.ui-icon');
 		icons.css({ marginLeft: (buttons.innerWidth() - icons.width()) / 2, marginTop:  (buttons.innerHeight() - icons.height()) / 2 });
 		
 		btnContainer.width(buttons.outerWidth());
 
-		var showOn = self._getData('showOn');
+		showOn = self._getData('showOn');
 		if (showOn == 'focus' || showOn == 'both') // pop-up date picker when in the marked field
 			input.focus(focus).blur(blur);
 		if (showOn == 'hover' || showOn == 'both') {
@@ -112,7 +122,8 @@ $.widget("ui.spinbuttons", {
 		
 		// events are declared in function so they have access to self variable and better minimization
 		function keyDown(e) {
-			var dir, large;
+			var dir, large, limit;
+			if (keyDir) return false; // only one direction at a time
 			
 			switch (e.keyCode) {
 				case up:
@@ -125,10 +136,27 @@ $.widget("ui.spinbuttons", {
 				case pageDown:
 					dir = -1;
 					large = e.keyCode == pageDown;
+					break;
+					
+				case right:
+				case left:
+					dir = (e.keyCode == right) ^ rtl ? 1 : -1;
+					break;
+					
+				case home:
+					limit = self._getData('min');
+					if (limit != null) self.setValue(limit);
+					return false;
+					
+				case end:
+					limit = self._getData('max');
+					if (limit != null) self.setValue(limit);
+					return false;
 			}
 			
 			if (dir) {
 				if (!inKeyDown && !self._getData('disabled')) {
+					keyDir = dir;
 					self._change(); // in case value changed then direction pressed
 					
 					(dir > 0 ? upButton : downButton).addClass(active);
@@ -147,15 +175,13 @@ $.widget("ui.spinbuttons", {
 		function keyUp(e) {
 			switch (e.keyCode) {
 				case up:
+				case right:
 				case pageUp:
-					upButton.removeClass(active);
-					self._clearTimer();
-					inKeyDown = false;
-					return false;
-					
 				case down:
+				case left:
 				case pageDown:
-					downButton.removeClass(active);
+					(keyDir > 0 ? upButton : downButton).removeClass(active)
+					keyDir = 0;
 					self._clearTimer();
 					inKeyDown = false;
 					return false;
@@ -342,7 +368,7 @@ $.widget("ui.spinbuttons", {
 	/* Set the value directly. */
 	setValue: function(value) {
 		this.value = value;
-		this.element.val(!value ? '' : value);
+		this.element.val(value != null ? value: '').change();
 	},
 
 	/* Retrieve the value directly. */
@@ -384,6 +410,7 @@ $.widget("ui.spinbuttons", {
 	
 	destroy: function(target) {
 		this.wrapper.after(this.element).remove();
+		this.element.css({ width: this._getData('oWidth'), marginRight: this._getData('oMargin') });
 		$.widget.prototype.destroy.call(this);
 	}	
 });

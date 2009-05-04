@@ -152,5 +152,10 @@ $("#myinput").spinbuttons("hideButtons", [immediate])
 Version History
 ----------------
 
+1.01
+	Implemented right/left and home/end keys per the DHTML Style Guide <http://dev.aol.com/dhtml_style_guide>
+	Fixed destroy implementation
+	Made setValue call change event on input
+
 1.0
 	Initial release
