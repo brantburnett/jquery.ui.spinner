@@ -5,24 +5,25 @@
 	<link rel="stylesheet" type="text/css" href="ui.theme.css" />
 	<link rel="stylesheet" type="text/css" href="../ui.spinner.css" />
 	<style type="text/css">
-		input {width: 100px}
+		#example {background-color: white; padding: 10px}
+		#example input {width: 100px}
 		
-		table.grid {
+		#example table.grid {
 			border-collapse: separate;
 			border-spacing: 0px;
 		}
-		table.grid th {
+		#example table.grid th {
 			background-color: #5d7b9d;
 			color: white;
 			font-weight: bold;
 		}
-		table.grid tr td {background-color: #ccc}
-		table.grid tr.alt td {background-color: #bbb}
-		table.grid td, table.grid th {padding: 3px 5px}
-		table.grid td.col-first, table.grid th.col-first {padding-left: 10px}
-		table.grid td.col-last, table.grid th.col-last {padding-right: 10px}
-		table.grid tr.header-first th {padding-top: 10px}
-		table.grid tr.row-last td {padding-bottom: 10px}
+		#example table.grid tr td {background-color: #ccc}
+		#example table.grid tr.alt td {background-color: #bbb}
+		#example table.grid td, table.grid th {padding: 3px 5px}
+		#example table.grid td.col-first, table.grid th.col-first {padding-left: 10px}
+		#example table.grid td.col-last, table.grid th.col-last {padding-right: 10px}
+		#example table.grid tr.header-first th {padding-top: 10px}
+		#example table.grid tr.row-last td {padding-bottom: 10px}
 	</style>
 	<script type="text/javascript" src="jquery-1.3.2.js"></script>
 	<script type="text/javascript" src="ui.core.js"></script>
@@ -40,13 +41,16 @@
 	</script>
 </head>
 <body>
+<div id="example">
+	<p>This is a simple example/test page for my jQuery UI 1.7 Spinner widget.  You can find the current version online at <a href="http://github.com/btburnett3/jquery.ui.spinner">GitHub</a>.</p>
+	
 	<p>Here is an example of a spinner based editor: <input type="text" id="spinner" maxlength="2" value="0" /> <input type="button" id="GetValue" value="Get Value" /></p>
 	
 	<p>Here is an example of one that hides: <input type="text" id="spinnerhide" maxlength="2" value="0" /> with some text after it</p>
 	
 	<p>Here is a disabled example: <input type="text" id="spinnerdisable" maxlength="2" value="0" disabled="disabled" /><br /><button id="enable">Enable</button><button id="disable">Disable</button></p>
 	
-	<p>Here is a table example:</p>
+	<p>Here is a table example (confirms that it is laid out correctly in the table):</p>
 	
 	<table class="grid">
 		<tr>
@@ -59,6 +63,7 @@
 		</tr>
 	</table>
 	
-	<p><input type="button" id="destroy" value="Test Destroy" /></p>
+	<p>Destroy the top spinner: <input type="button" id="destroy" value="Destroy" /></p>
+</div>
 </body>
 </html>
