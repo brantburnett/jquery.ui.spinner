@@ -1,4 +1,4 @@
-jQuery.ui.spinner
+jQuery.ui.spinner 1.10
 jQuery.ui extension for a numeric spinner
 
 Licensing
@@ -56,7 +56,7 @@ Options
 --------
 
 The spinner also support a variety of options which can be passed in an object to the
-constructor:
+constructor.  Page wide defaults can be assigned to $.ui.spinner.defaults.
 
 	min (integer)
 		Minimum allowed value of the spinner.  If left with the default, null, there will be no
@@ -68,7 +68,7 @@ constructor:
 		maximum unless the input has a maximum length.  Then the maximum will be calculated.  For
 		a textbox with a maximum length of 3 characters, the maximum will be 999, etc.
 		
-	increment (integer)
+	step (integer)
 		A positive number that the spinner should be incremented by when up is clicked or pressed.
 		The spinner will be decremented by this amount for down.  Defaults to 1.
 		
@@ -103,6 +103,12 @@ constructor:
 	spinsBeforeDelayTwo (integer)
 		This is how many times spinDelayOne should be used before the spinner speeds up and
 		switches to using spinDelayTwo.  Defaults to 3.
+		
+	mouseWheel (boolean)
+		If true then mouse wheel events will be attached.  Defaults to true.
+		
+	allowNull (boolean)
+		If true then the control will allow a blank (null) value.  Defaults to false.
 		
 Example Option Usage
 ---------------------
@@ -151,6 +157,16 @@ $("#myinput").spinner("hideButtons", [immediate])
 	
 Version History
 ----------------
+
+1.10
+	Added support for mouse wheel
+	Added keypress filtering for numbers, special keys only
+	Fixed input always focusing on spinner init (caused error in IE)
+	Added event namespacing to improve destroy
+	Added allowNull option
+	Renamed increment option to step
+	Will now load HTML5 min, max, and step attributes
+	Now sets the maxlength of the input based on min and max
 
 1.01
 	Renamed from spinbuttons to spinner
