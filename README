@@ -90,19 +90,20 @@ constructor.  Page wide defaults can be assigned to $.ui.spinner.defaults.
 	width (integer)
 		Width in pixels of the spinner.  Defaults to 16.
 		
-	spinDelayOne (integer)
-		If you hold down a direction arrow, page up/down, or mouse button on the spinner, this
-		is the amount of time in milliseconds before the increment/decrement repeats.  Defaults
-		to 500 milliseconds.
+	increment (array or string)
+		Controls the speed of the incremental spin when you hold a button or key down.  Can be set
+		to 'fast' or 'slow' to use predefined speeds.  However, you can also supply an array of
+		objects to control the speed increments, or null to stop continuous spinning.  The default
+		is 'slow'. The objects in the array must have the following properties:
 		
-	spinDelayTwo (integer)
-		After you hold down a key/button for a while, the spinner will speed up.  This is the
-		delay in milliseconds between each increment/decrement during the faster spin.  Defaults
-		to 100 millseconds.
+		count (integer)
+			Number of times to increment at this speed before moving to the next speed.
 		
-	spinsBeforeDelayTwo (integer)
-		This is how many times spinDelayOne should be used before the spinner speeds up and
-		switches to using spinDelayTwo.  Defaults to 3.
+		mult (integer)
+			Number to multiply the current step by.  This increases the amount of each increment.
+		
+		delay (integer)
+			Number of milliseconds to delay between each increment.
 		
 	mouseWheel (boolean)
 		If true then mouse wheel events will be attached.  Defaults to true.
@@ -167,6 +168,8 @@ Version History
 	Renamed increment option to step
 	Will now load HTML5 min, max, and step attributes
 	Now sets the maxlength of the input based on min and max
+	Changed incremental speed increase to use an array, or be passed 'slow' and 'fast' options
+	Changing options after the spinner is created now works
 
 1.01
 	Renamed from spinbuttons to spinner

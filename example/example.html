@@ -12,18 +12,7 @@
 			border-collapse: separate;
 			border-spacing: 0px;
 		}
-		#example table.grid th {
-			background-color: #5d7b9d;
-			color: white;
-			font-weight: bold;
-		}
-		#example table.grid tr td {background-color: #ccc}
-		#example table.grid tr.alt td {background-color: #bbb}
-		#example table.grid td, table.grid th {padding: 3px 5px}
-		#example table.grid td.col-first, table.grid th.col-first {padding-left: 10px}
-		#example table.grid td.col-last, table.grid th.col-last {padding-right: 10px}
-		#example table.grid tr.header-first th {padding-top: 10px}
-		#example table.grid tr.row-last td {padding-bottom: 10px}
+		#example table.grid td {background-color: #ccc; padding: 3px 5px; text-align: left}
 	</style>
 	<script type="text/javascript" src="jquery-1.3.2.js"></script>
 	<script type="text/javascript" src="ui.core.js"></script>
@@ -32,16 +21,23 @@
 	<script type="text/javascript">
 		jQuery().ready(function($) {
 			$('#spinner').spinner({ min: -100, max: 100 });
+			$('#spinnerfast').spinner({ min: -1000, max: 1000, increment: 'fast' });
 			$('#spinnerhide').spinner({ min: 0, max: 100, showOn: 'both' });
 			$('#spinnernull').spinner({ min: -100, max: 100, allowNull: true });
 			$('#spinnerdisable').spinner({ min: -100, max: 100 });
-			$('#spinnermax').spinner();
+			$('#spinnermaxlen').spinner();
 			$('#spinner5').spinner();
-			$('.grid input').spinner({ min: -100, max: 100 });
-			$('#enable').click(function() { $('#spinnerdisable').spinner("enable"); });
-			$('#disable').click(function() { $('#spinnerdisable').spinner("disable"); });
-			$('#GetValue').click(function() { alert($('#spinner').spinner("getValue")); });
-			$('#destroy').click(function() { $('#spinner').spinner("destroy"); });
+			$('#enable').click(function() { $('#spinnerdisable').spinner('enable'); });
+			$('#disable').click(function() { $('#spinnerdisable').spinner('disable'); });
+			$('#GetValue').click(function() { alert($('#spinner').spinner('getValue')); });
+			$('#destroy').click(function() { $('#spinner').spinner('destroy'); });
+			
+			$('#spinnerconfig').spinner({min: -1000, max: 1000, step: 1, increment: 'fast'});
+			$('#spinnermax').spinner().change(function() {$('#spinnerconfig').spinner('option', 'max', parseInt($(this).val()));});
+			$('#spinnermin').spinner().change(function() {$('#spinnerconfig').spinner('option', 'min', parseInt($(this).val()));});
+			$('#spinnerstep').spinner().change(function() {$('#spinnerconfig').spinner('option', 'step', parseInt($(this).val()));});
+			$('#spinnerspeed').change(function() {$('#spinnerconfig').spinner('option', 'increment', $(this).val());});
+			$('#spinnermousewheel').change(function() {$('#spinnerconfig').spinner('option', 'mouseWheel', $(this).is(':checked'));});
 			
 			$("#switcher").themeswitcher();
 		});
@@ -53,7 +49,9 @@
 	
 	<div id="switcher"></div>
 	
-	<p>Here is an example of a spinner based editor: <input type="text" id="spinner" value="0" /> <input type="button" id="GetValue" value="Get Value" /></p>
+	<p>Here is an example of a spinner based editor: <input type="text" id="spinner" value="0" /> <input type="button" id="GetValue" value="Get Value" /> <input type="button" id="destroy" value="Destroy" /></p>
+	
+	<p>Here is a fast spinner: <input type="text" id="spinnerfast" value="0" /> <input type="button" id="GetValue" value="Get Value" /></p>
 	
 	<p>Here is an example of one that hides: <input type="text" id="spinnerhide" value="0" /> with some text after it</p>
 	
@@ -61,24 +59,27 @@
 	
 	<p>Here is a disabled example: <input type="text" id="spinnerdisable" value="0" disabled="disabled" /><br /><button id="enable">Enable</button><button id="disable">Disable</button></p>
 
-	<p>Here is an example with maxlength: <input type="number" id="spinnermax" value="0" maxlength="3" /></p>
+	<p>Here is an example with maxlength: <input type="number" id="spinnermaxlen" value="0" maxlength="3" /></p>
 
 	<p>Here is an example with HTML5 attributes: <input type="number" id="spinner5" maxlength="2" value="0" min="0" max="100" step="5" /></p>
 
-	<p>Here is a table example (confirms that it is laid out correctly in the table):</p>
-	
 	<table class="grid">
-		<tr>
-			<td>Number 1:</td>
-			<td><input type="text" maxlength="2" value="0" /></td>
-		</tr>
-		<tr>
-			<td>Number 2:</td>
-			<td><input type="text" maxlength="2" value="0" /></td>
-		</tr>
+		<tr><td>Configurable spinner:</td>
+			<td><input type="text" id="spinnerconfig" value="0" /></td></tr>
+		<tr><td>Maximum:</td>
+			<td><input type="text" id="spinnermax" value="1000" /></td></tr>
+		<tr><td>Minimum:</td>
+			<td><input type="text" id="spinnermin" value="-1000" /></td></tr>
+		<tr><td>Step:</td>
+			<td><input type="text" id="spinnerstep" value="1" /></td></tr>
+		<tr><td>Speed:</td>
+			<td><select id="spinnerspeed">
+					<option value="slow">Slow</option>
+					<option selected="selected" value="fast">Fast</option>
+				</select></td></tr>
+		<tr><td>Mouse Wheel:</td>
+			<td><input type="checkbox" id="spinnermousewheel" checked="checked" /></td></tr>
 	</table>
-	
-	<p>Destroy the top spinner: <input type="button" id="destroy" value="Destroy" /></p>
 </div>
 </body>
 </html>
