@@ -58,23 +58,38 @@ Options
 The spinner also support a variety of options which can be passed in an object to the
 constructor.  Page wide defaults can be assigned to $.ui.spinner.defaults.
 
-	min (integer)
+	min (float)
 		Minimum allowed value of the spinner.  If left with the default, null, there will be no
 		minimum unless the input has a maximum length.  Then the minimum will be calculated.  For
 		a textbox with a maximum length of 3 characters, the minimum will be -99, etc.
 					
-	max (integer)
+	max (float)
 		Maximum allowed value of the spinner.  If left with the default, null, there will be no
 		maximum unless the input has a maximum length.  Then the maximum will be calculated.  For
 		a textbox with a maximum length of 3 characters, the maximum will be 999, etc.
 		
-	step (integer)
+	places (integer)
+		Number of decimal places to display.  Defaults to use the number of places found in step.
+				
+	step (float)
 		A positive number that the spinner should be incremented by when up is clicked or pressed.
 		The spinner will be decremented by this amount for down.  Defaults to 1.
 		
-	largeIncrement (integer)
-		Used like increment, but for when page up or page down are pressed to jump in larger
+	largeStep (float)
+		Used like step, but for when page up or page down are pressed to jump in larger
 		amounts.  Defaults to 10.
+		
+	group (string)
+		Grouping separator.  Would commonly be set to ',', defaults to ''.
+	
+	point (string)
+		Decimal point character.  Defaults to '.'.
+		
+	prefix (string)
+		Character prefix before the number.  Commonly used for currency symbols.  Defaults to ''.
+		
+	suffix (string)
+		Character suffix after the number.  Commonly used for percentage signs.  Defaults to ''.
 		
 	className (string)
 		Optional class name that should be applied to the container span that is created around
@@ -110,6 +125,37 @@ constructor.  Page wide defaults can be assigned to $.ui.spinner.defaults.
 		
 	allowNull (boolean)
 		If true then the control will allow a blank (null) value.  Defaults to false.
+	
+	format ( function(num, places, element) )
+		Function that returns a formatted number.  By default formats using the prefix, suffix,
+		places, and point options.  Note that this may be called during initialization before
+		the spinner is fully constructed.
+		
+		this
+			options object, should be treated as read-only
+		
+		num (float)
+			Number to be formatted
+		
+		places (integer)
+			Number of decimal places to display
+		
+		element (jQuery)
+			input element
+			
+		
+	parse ( function(num, element) )
+		Function that returns a number parsed from an input string.  Will only be called if the
+		input is non-null.  By default parses using the prefix, suffix, and point options.
+		
+		this
+			options object, should be treated as read-only
+		
+		num (string)
+			Number to be parsed
+		
+		element (jQuery)
+			input element
 		
 Example Option Usage
 ---------------------
@@ -126,12 +172,12 @@ Other Commands
 The spinner also support commands after they are created, using the standard UI widget method
 of passing strings.
 
-$("#myinput").spinner("getValue")
+$("#myinput").spinner("value")
 	Returns the integer value of the input.  Returns null if the input is blank.
 	
-$("#myinput").spinner("setValue", value)
+$("#myinput").spinner("value", value)
 	Sets the integer value of the input.  Still validates against min and max, null blanks the
-	input.
+	input if nulls are allowed.
 	
 $("#myinput").spinner("enable")
 	Enables the spinner and the input
@@ -170,6 +216,8 @@ Version History
 	Now sets the maxlength of the input based on min and max
 	Changed incremental speed increase to use an array, or be passed 'slow' and 'fast' options
 	Changing options after the spinner is created now works
+	Added support for decimal places and currency prefix/suffixes
+	Added support for custom formatting
 
 1.01
 	Renamed from spinbuttons to spinner

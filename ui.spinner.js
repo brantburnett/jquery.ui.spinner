@@ -1,4 +1,7 @@
-(function($) {
+/*
+ * jQuery UI Spinner 1.10
+ */
+ (function($) {
 
 var 
 	// constants
@@ -26,36 +29,16 @@ var
 	// stores the currently focused spinner
 	// Note: due to oddities in the focus/blur events, this is part of a two-part system for confirming focus
 	// this must set to the control, and the focus variable must be true
-	// this is because hitting up/down arrows causes focus to change, but blur event for previous control doesn't fire
+	// this is because hitting up/down arrows with mouse causes focus to change, but blur event for previous control doesn't fire
 	focusCtrl,
 	
-	// number of active spinners on the page, used to know when to bind or unbind the mousewheel event from the document
-	spinnerCount = 0;
+	// shortcut to $.ui.spinner, set after creation at bottom
+	spinner;
 	
-function mouseWheel(e) {
-	if (focusCtrl && focusCtrl.focused && focusCtrl.options.mouseWheel && !focusCtrl.options.disabled) {
-		// make sure changes are posted
-		focusCtrl._change();
-		focusCtrl._doSpin(((e.wheelDelta || -e.detail) > 0 ? 1 : -1) * focusCtrl.options.step);
-		return false;
-	}
-}
-
-function incCount() {
-	spinnerCount++;
-	if (spinnerCount == 1)
-		$().bind(mouseWheelEventName, mouseWheel);
-}
-
-function decCount() {
-	spinnerCount--;
-	if (!spinnerCount)
-		$().unbind(mouseWheelEventName, mouseWheel);
-}
-
 $.widget('ui.spinner', {
 	// * Widget fields *
 	// value - current value
+	// places - currently effective number of decimal places
 	// oWidth - original input width (used for destroy)
 	// oMargin - original input right margin (used for destroy)
 	// counter - number of spins at the current spin speed
@@ -80,8 +63,6 @@ $.widget('ui.spinner', {
 
 		if (!input.is(':enabled'))
 			self.disable();
-			
-		incCount();
 	},
 	
 	_createButtons: function(input) {
@@ -110,7 +91,7 @@ $.widget('ui.spinner', {
 			hoverDelayCallback,
 			
 			// current state booleans
-			hovered, inKeyDown, inMouseDown,
+			hovered, inKeyDown, inSpecialKey, inMouseDown,
 						
 			// used to reverse left/right key directions
 			rtl = input[0].dir == 'rtl';
@@ -126,7 +107,7 @@ $.widget('ui.spinner', {
 		buttons.css({ width: buttonWidth - (box ? buttons.outerWidth() - buttons.width() : 0), height: height/2 - (box ? buttons.outerHeight() - buttons.height() : 0) });
 		upButton = buttons[0];
 		downButton = buttons[1];
-		
+
 		// fix icon centering
 		icons = buttons.find('.ui-icon');
 		icons.css({ marginLeft: (buttons.innerWidth() - icons.width()) / 2, marginTop:  (buttons.innerHeight() - icons.height()) / 2 });
@@ -190,7 +171,11 @@ $.widget('ui.spinner', {
 					var dir, large, limit,
 						keyCode = e.keyCode; // shortcut for minimization
 					if (e.ctrl || e.alt) return true; // ignore these events
-					if (inKeyDown || invalidKey(keyCode)) return false; // only one direction at a time, and suppress invalid keys
+					
+					if (isSpecialKey(keyCode))
+						inSpecialKey = true;
+					
+					if (inKeyDown) return false; // only one direction at a time, and suppress invalid keys
 					
 					switch (keyCode) {
 						case up:
@@ -212,13 +197,13 @@ $.widget('ui.spinner', {
 							
 						case home:
 							limit = self.options.min;
-							if (limit != null) self.setValue(limit);
+							if (limit != null) self._setValue(limit);
 							return false;
 							
 						case end:
 							limit = self.options.max;
 							limit = self.options.max;
-							if (limit != null) self.setValue(limit);
+							if (limit != null) self._setValue(limit);
 							return false;
 					}
 					
@@ -226,7 +211,7 @@ $.widget('ui.spinner', {
 						if (!inKeyDown && !options.disabled) {
 							keyDir = dir;
 							
-							(dir > 0 ? upButton : downButton).addClass(active);
+							$(dir > 0 ? upButton : downButton).addClass(active);
 							inKeyDown = true;
 							self._startSpin(dir, large);
 						}
@@ -237,7 +222,9 @@ $.widget('ui.spinner', {
 				
 			.bind('keyup' + eventNamespace, function(e) {
 					if (e.ctrl || e.alt) return true; // ignore these events
-					if (invalidKey(e.keyCode)) return false;
+					
+					if (isSpecialKey(keyCode))
+						inSpecialKey = false;
 					
 					switch (e.keyCode) {
 						case up:
@@ -251,6 +238,10 @@ $.widget('ui.spinner', {
 							inKeyDown = false;
 							return false;
 					}
+				})
+				
+			.bind('keypress' + eventNamespace, function(e) {
+					if (invalidKey(e.keyCode, e.charCode)) return false;
 				})
 				
 			.bind('change' + eventNamespace, function() { self._change(); })
@@ -272,14 +263,24 @@ $.widget('ui.spinner', {
 					if (!hovered && (showOn == 'focus' || showOn == 'both')) // hovered will only be set if hover affects show
 						self.hideButtons();
 				});
-			
-		function invalidKey(keyCode) {
-			if ((keyCode == 109) // minus sign
-				|| ((keyCode >= 48) && (keyCode <= 57)) // number keys
-				|| ((keyCode >= 96) && (keyCode <= 105))) // numeric keypad
-				return false;
+				
+		function isSpecialKey(keyCode) {
 			for (var i=0; i<validKeys.length; i++) // predefined list of special keys
-				if (validKeys[i] == keyCode) return false;
+				if (validKeys[i] == keyCode) return true;
+				
+			return false;
+		}
+			
+		function invalidKey(keyCode, charCode) {
+			if (inSpecialKey) return false;				
+			
+			var ch = String.fromCharCode(charCode || keyCode),
+				options = self.options;
+				
+			if ((ch >= '0') && (ch <= '9') || (ch == '-')) return false;
+			if (((self.places > 0) && (ch == options.point))
+				|| (ch == options.group)) return false;
+						
 			return true;
 		}
 		
@@ -328,17 +329,20 @@ $.widget('ui.spinner', {
 	},
 	
 	_procOptions: function(init) {
-		var input = this.element,
-			options = this.options,
+		var self = this,
+			input = self.element,
+			options = self.options,
 			min = options.min,
 			max = options.max,
 			step = options.step,
+			places = options.places,
 			maxlength = -1, temp;
-					
+			
 		// setup increment based on speed string
 		if (options.increment == 'slow')
 			options.increment = [{count: 1, mult: 1, delay: 250},
-								 {count: 0, mult: 1, delay: 100}];
+								 {count: 3, mult: 1, delay: 100},
+								 {count: 0, mult: 1, delay: 50}];
 		else if (options.increment == 'fast')
 			options.increment = [{count: 1, mult: 1, delay: 250},
 								 {count: 19, mult: 1, delay: 100},
@@ -347,23 +351,29 @@ $.widget('ui.spinner', {
 								 {count: 0, mult: 100, delay: 20}];
 
 		if ((min == null) && ((temp = input.attr('min')) != null))
-			min = parseInt(temp);
+			min = parseFloat(temp);
 		
 		if ((max == null) && ((temp = input.attr('max')) != null))
-			max = parseInt(temp);
+			max = parseFloat(temp);
 		
 		if (!step && ((temp = input.attr('step')) != null))
 			if (temp != 'any') {
-				step = parseInt(temp);
+				step = parseFloat(temp);
 				options.largeStep *= step;
 			}
-				
+		options.step = step = step || options.defaultStep;
+
+		// Process step for decimal places if none are specified
+		if ((places == null) && ((temp = step + '').indexOf('.') != -1))
+			places = temp.length - temp.indexOf('.') - 1;
+		self.places = places;
+		
 		if ((max != null) && (min != null)) {
 			// ensure that min is less than or equal to max
 			if (min > max) min = max;
 			
 			// set maxlength based on min/max
-			maxlength = Math.max(Math.max(maxlength, (max + '').length), (min + '').length);
+			maxlength = Math.max(Math.max(maxlength, options.format(max, places, input).length), options.format(min, places, input).length);
 		}
 		
 		// only lookup input maxLength on init
@@ -385,10 +395,23 @@ $.widget('ui.spinner', {
 					
 		options.min = min;
 		options.max = max;
-		options.step = step || options.defaultStep;
 		
 		// ensures that current value meets constraints
-		this._change();
+		self._change();
+		
+		input.unbind(mouseWheelEventName + eventNamespace);
+		if (options.mouseWheel)
+			input.bind(mouseWheelEventName + eventNamespace, self._mouseWheel);
+	},
+		
+	_mouseWheel: function(e) {
+		var self = $.data(this, 'spinner');
+		if (!self.options.disabled && self.focused && (focusCtrl === self)) {
+			// make sure changes are posted
+			self._change();
+			self._doSpin(((e.wheelDelta || -e.detail) > 0 ? 1 : -1) * self.options.step);
+			return false;
+		}
 	},
 	
 	// sets an interval to call the _spin function
@@ -454,13 +477,13 @@ $.widget('ui.spinner', {
 		if (value == null)
 			value = (step > 0 ? self.options.min : self.options.max) || 0;
 		
-		self.setValue(value + step);
+		self._setValue(value + step);
 	},
 	
 	// Parse the value currently in the field
 	_parseValue: function() {
 		var value = this.element.val();
-		return value ? parseInt(value) : null;
+		return value ? this.options.parse(value, this.element) : null;
 	},
 	
 	_validate: function(value) {
@@ -491,7 +514,7 @@ $.widget('ui.spinner', {
 		if (isNaN(value))
 			value = self.value;
 
-		self.setValue(value);
+		self._setValue(value);
 	},
 	
 	// overrides _setData to force option parsing
@@ -526,16 +549,27 @@ $.widget('ui.spinner', {
 	},
 	
 	// Set the value directly
-	// if dontFire is set, then change event shouldn't be fired on the input
-	setValue: function(value) {
-		this.value = value = this._validate(value);
-		this.selfChange = true;
-		this.element.val(value != null ? value : '').change();
-		this.selfChange = false;
+	_setValue: function(value) {
+		var self = this;
+		
+		self.value = value = self._validate(value);
+
+		self.selfChange = true;
+		self.element.val(value != null ? 
+			self.options.format(value, self.places, self.element) :
+			'').change();
+		self.selfChange = false;
 	},
 
-	// Retrieve the value
-	getValue: function() {
+	// Set or retrieve the value
+	value: function(newValue) {
+		if (arguments.length) {
+			this._setValue(newValue);
+			
+			// maintains chaining
+			return this.element;
+		}
+
 		return this.value;
 	},
 
@@ -558,18 +592,13 @@ $.widget('ui.spinner', {
 		this.wrapper.remove();
 		this.element.unbind(eventNamespace).css({ width: this.oWidth, marginRight: this.oMargin });
 		
-		decCount();
-		this.focused = false;
-		if (focusCtrl === this)
-			focusCtrl = null;
-
 		$.widget.prototype.destroy.call(this);
 	}	
 });
 
-$.extend($.ui.spinner, {
+spinner = $.extend($.ui.spinner, {
 	version: '1.10',
-	getter: 'getValue',
+	getter: 'value',
 	defaults: {
 		min: null,
 		max: null,
@@ -577,8 +606,9 @@ $.extend($.ui.spinner, {
 		
 		group: '',
 		point: '.',
-		currency: false,
-		decimal: 0,
+		prefix: '',
+		suffix: '',
+		places: null, // null causes it to detect the number of places in step
 		
 		defaultStep: 1, // real value is 'step', and should be passed as such.  This value is used to detect if passed value should override HTML5 attribute
 		largeStep: 10,
@@ -586,17 +616,25 @@ $.extend($.ui.spinner, {
 		increment: 'slow',		
 		className: null,
 		showOn: 'always',
-		width: 16
-	},
-	format: {
-		currency: function(num, sym, group, pt) {
-			num = isNaN(num) ? 0 : num;
-			return (num < 0 ? '-' : '') + sym + this.number(Math.abs(num), 2, group || ',', pt);
+		width: 16,
+		
+		format: function(num, places) {
+			var options = this,
+				regex = /(\d+)(\d{3})/,
+				result = ((isNaN(num) ? 0 : Math.abs(num)).toFixed(places)) + '';
+				
+			for (result = result.replace('.', options.point); regex.test(result) && options.group; result=result.replace(regex, '$1'+options.group+'$2'));
+			return (num < 0 ? '-' : '') + options.prefix + result + options.suffix;
 		},
-		number: function(num, dec, group, pt) {
-			var regex = /(\d+)(\d{3})/;
-			for (num = isNaN(num) ? 0 : parseFloat(num,10).toFixed(dec), num = num.replace('.', pt); regex.test(num) && group; num=num.replace(regex, '$1'+group+'$2'));
-			return num;
+		
+		parse: function(val) {
+			var options = this;
+			
+			if (options.group == '.')
+				val = val.replace('.', '');
+			if (options.point != '.')
+				val = val.replace(options.point, '.');
+			return parseFloat(val.replace(/[^0-9\-\.]/g, ''));
 		}
 	}
 });
