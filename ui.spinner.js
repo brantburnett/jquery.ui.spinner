@@ -82,7 +82,11 @@ $.widget('ui.spinner', {
 			wrapper = self.wrapper = input.css({ width: (self.oWidth = (box ? input.width() : input.outerWidth())) - buttonWidth, 
 												 marginRight: rightMargin + buttonWidth, textAlign: 'right' })
 				.after('<span class="ui-spinner ui-widget"></span>').next(),
-			btnContainer = self.btnContainer = $('<div class="ui-spinner-buttons"><div class="ui-spinner-up ui-spinner-button ui-state-default ui-corner-tr"><span class="ui-icon ui-icon-triangle-1-n">&nbsp;</span></div><div class="ui-spinner-down ui-spinner-button ui-state-default ui-corner-br"><span class="ui-icon ui-icon-triangle-1-s">&nbsp;</span></div></div>'),
+			btnContainer = self.btnContainer = $(
+				'<div class="ui-spinner-buttons">' + 
+					'<div class="ui-spinner-up ui-spinner-button ui-state-default ui-corner-tr"><span class="ui-icon '+options.upIconClass+'">&nbsp;</span></div>' + 
+					'<div class="ui-spinner-down ui-spinner-button ui-state-default ui-corner-br"><span class="ui-icon '+options.downIconClass+'">&nbsp;</span></div>' + 
+				'</div>'),
 
 			// object shortcuts
 			upButton, downButton, buttons, icons,
@@ -597,7 +601,7 @@ $.widget('ui.spinner', {
 });
 
 spinner = $.extend($.ui.spinner, {
-	version: '1.10',
+	version: '1.11',
 	getter: 'value',
 	defaults: {
 		min: null,
@@ -617,6 +621,8 @@ spinner = $.extend($.ui.spinner, {
 		className: null,
 		showOn: 'always',
 		width: 16,
+		upIconClass: "ui-icon-triangle-1-n",
+		downIconClass: "ui-icon-triangle-1-s",
 		
 		format: function(num, places) {
 			var options = this,
