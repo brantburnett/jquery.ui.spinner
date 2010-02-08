@@ -1,5 +1,8 @@
-/*
- * jQuery UI Spinner 1.10
+/** 
+ * @license jQuery UI Spinner 1.11
+ *
+ * Copyright 2009-2010 Brant Burnett
+ * Dual licensed under the MIT or GPL Version 2 licenses.
  */
  (function($) {
 
@@ -37,7 +40,7 @@ var
 	
 $.widget('ui.spinner', {
 	// * Widget fields *
-	// value - current value
+	// curvalue - current value
 	// places - currently effective number of decimal places
 	// oWidth - original input width (used for destroy)
 	// oMargin - original input right margin (used for destroy)
@@ -476,7 +479,7 @@ $.widget('ui.spinner', {
 	_doSpin: function(step) {
 		// shortcut
 		var self = this,
-			value = self.value;
+			value = self.curvalue;
 			
 		if (value == null)
 			value = (step > 0 ? self.options.min : self.options.max) || 0;
@@ -496,7 +499,7 @@ $.widget('ui.spinner', {
 			max = options.max;
 
 		if ((value == null) && !options.allowNull)
-			value = this.value != null ? this.value : min || max || 0; // must confirm not null in case just initializing and had blank value
+			value = this.curvalue != null ? this.curvalue : min || max || 0; // must confirm not null in case just initializing and had blank value
 
 		if ((max != null) && (value > max))
 			return max;
@@ -516,7 +519,7 @@ $.widget('ui.spinner', {
 		if (self.selfChange) return;
 		
 		if (isNaN(value))
-			value = self.value;
+			value = self.curvalue;
 
 		self._setValue(value);
 	},
@@ -556,7 +559,7 @@ $.widget('ui.spinner', {
 	_setValue: function(value) {
 		var self = this;
 		
-		self.value = value = self._validate(value);
+		self.curvalue = value = self._validate(value);
 
 		self.selfChange = true;
 		self.element.val(value != null ? 
@@ -574,7 +577,7 @@ $.widget('ui.spinner', {
 			return this.element;
 		}
 
-		return this.value;
+		return this.curvalue;
 	},
 
 	enable: function() {
@@ -629,7 +632,7 @@ spinner = $.extend($.ui.spinner, {
 				regex = /(\d+)(\d{3})/,
 				result = ((isNaN(num) ? 0 : Math.abs(num)).toFixed(places)) + '';
 				
-			for (result = result.replace('.', options.point); regex.test(result) && options.group; result=result.replace(regex, '$1'+options.group+'$2'));
+			for (result = result.replace('.', options.point); regex.test(result) && options.group; result=result.replace(regex, '$1'+options.group+'$2')) {};
 			return (num < 0 ? '-' : '') + options.prefix + result + options.suffix;
 		},
 		
