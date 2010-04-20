@@ -516,12 +516,12 @@ $.widget('ui.spinner', {
 			max = self.options.max;
 			
 		// don't reprocess if change was self triggered
-		if (self.selfChange) return;
-		
-		if (isNaN(value))
-			value = self.curvalue;
+		if (!self.selfChange) {
+			if (isNaN(value))
+				value = self.curvalue;
 
-		self._setValue(value);
+			self._setValue(value, true);
+		}
 	},
 	
 	// overrides _setData to force option parsing
@@ -556,16 +556,19 @@ $.widget('ui.spinner', {
 	},
 	
 	// Set the value directly
-	_setValue: function(value) {
+	_setValue: function(value, suppressFireEvent) {
 		var self = this;
 		
 		self.curvalue = value = self._validate(value);
-
-		self.selfChange = true;
 		self.element.val(value != null ? 
 			self.options.format(value, self.places, self.element) :
-			'').change();
-		self.selfChange = false;
+			'');
+		
+		if (!suppressFireEvent) {
+			self.selfChange = true;
+			self.element.change();
+			self.selfChange = false;
+		}
 	},
 
 	// Set or retrieve the value
