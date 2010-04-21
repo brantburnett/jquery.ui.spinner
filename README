@@ -1,28 +1,17 @@
-jQuery.ui.spinner 1.10
+jQuery.ui.spinner 1.20
 jQuery.ui extension for a numeric spinner
 
 Licensing
 ----------
 
 Written by Brant Burnett <http://btburnett.com/> <mailto:btburnett3@gmail.com>
-jQuery.ui.spinner is distributed under the terms of the GNU Lesser General Public License (GPL)
-
-jQuery.ui.spinner is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Copyright (c) 2009-2010 Brant Burnett
+Dual licensed under the MIT or GPL Version 2 licenses.
 
 jQuery.ui.spinner is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with jQuery.ui.spinner.  If not, see <http://www.gnu.org/licenses/>.
-
-The basic rules of the license are the you can use and change the code here as you see fit,
-but you can't remove the license and you can't sell the code.  Please review the license
-for more details.
 
 Source Control
 ---------------
@@ -33,7 +22,7 @@ The root branch for jQuery.ui.spinner is hosted on GitHub at
 Overview
 ---------
 
-jQuery.ui.spinner is based upon jQuery UI 1.7 <http://ui.jquery.com>, and provides a new
+jQuery.ui.spinner is based upon jQuery UI 1.8 <http://ui.jquery.com>, and provides a new
 spinner widget that can be added to any text box.  It fully uses the theme settings created by the
 ThemeRoller, and has been tested for compatibility with IE 6/7/8, Firefox 2/3, Safari 3.1, and
 Opera 9.  Supports both mouse and keyboard input, and validates input directly into the text box.
@@ -204,6 +193,9 @@ $("#myinput").spinner("hideButtons", [immediate])
 	
 Version History
 ----------------
+
+1.20
+	Updated for the UI 1.8 widget factory
 
 1.10
 	Added support for mouse wheel

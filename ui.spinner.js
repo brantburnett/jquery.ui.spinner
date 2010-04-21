@@ -1,16 +1,17 @@
 /** 
- * @license jQuery UI Spinner 1.11
+ * @license jQuery UI Spinner 1.20
  *
- * Copyright 2009-2010 Brant Burnett
+ * Copyright (c) 2009-2010 Brant Burnett
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
- (function($) {
+ (function($, undefined) {
 
 var 
 	// constants
 	active = 'ui-state-active',
 	hover = 'ui-state-hover',
 	disabled = 'ui-state-disabled',
+	
 	keyCode = $.ui.keyCode,
 	up = keyCode.UP,
 	down = keyCode.DOWN,
@@ -20,6 +21,7 @@ var
 	pageDown = keyCode.PAGE_DOWN,
 	home = keyCode.HOME,
 	end = keyCode.END,
+	
 	msie = $.browser.msie,
 	mouseWheelEventName = $.browser.mozilla ? 'DOMMouseScroll' : 'mousewheel',
 	
@@ -33,12 +35,50 @@ var
 	// Note: due to oddities in the focus/blur events, this is part of a two-part system for confirming focus
 	// this must set to the control, and the focus variable must be true
 	// this is because hitting up/down arrows with mouse causes focus to change, but blur event for previous control doesn't fire
-	focusCtrl,
-	
-	// shortcut to $.ui.spinner, set after creation at bottom
-	spinner;
+	focusCtrl;
 	
 $.widget('ui.spinner', {
+	options: {
+		min: null,
+		max: null,
+		allowNull: false,
+		
+		group: '',
+		point: '.',
+		prefix: '',
+		suffix: '',
+		places: null, // null causes it to detect the number of places in step
+		
+		defaultStep: 1, // real value is 'step', and should be passed as such.  This value is used to detect if passed value should override HTML5 attribute
+		largeStep: 10,
+		mouseWheel: true,
+		increment: 'slow',		
+		className: null,
+		showOn: 'always',
+		width: 16,
+		upIconClass: "ui-icon-triangle-1-n",
+		downIconClass: "ui-icon-triangle-1-s",
+		
+		format: function(num, places) {
+			var options = this,
+				regex = /(\d+)(\d{3})/,
+				result = ((isNaN(num) ? 0 : Math.abs(num)).toFixed(places)) + '';
+				
+			for (result = result.replace('.', options.point); regex.test(result) && options.group; result=result.replace(regex, '$1'+options.group+'$2')) {};
+			return (num < 0 ? '-' : '') + options.prefix + result + options.suffix;
+		},
+		
+		parse: function(val) {
+			var options = this;
+			
+			if (options.group == '.')
+				val = val.replace('.', '');
+			if (options.point != '.')
+				val = val.replace(options.point, '.');
+			return parseFloat(val.replace(/[^0-9\-\.]/g, ''));
+		}
+	},
+	
 	// * Widget fields *
 	// curvalue - current value
 	// places - currently effective number of decimal places
@@ -50,7 +90,7 @@ $.widget('ui.spinner', {
 	// inputMaxLength - initial maxLength value on the input
 	// focused - this spinner currently has the focus
 
-	_init: function() {
+	_create: function() {
 		// shortcuts
 		var self = this,
 			input = self.element,
@@ -525,8 +565,8 @@ $.widget('ui.spinner', {
 	},
 	
 	// overrides _setData to force option parsing
-	_setData: function(key, value) {
-		$.widget.prototype._setData.call(this, key, value);
+	_setOption: function(key, value) {
+		$.Widget.prototype._setOption.call(this, key, value);
 		this._procOptions();
 	},
 	
@@ -586,7 +626,7 @@ $.widget('ui.spinner', {
 	enable: function() {
 		this.buttons.removeClass(disabled);
 		this.element[0].disabled = false;
-		$.widget.prototype.enable.call(this);
+		$.Widget.prototype.enable.call(this);
 	},
 	
 	disable: function() {
@@ -595,60 +635,15 @@ $.widget('ui.spinner', {
 			.removeClass(hover);
 			
 		this.element[0].disabled = true;
-		$.widget.prototype.disable.call(this);
+		$.Widget.prototype.disable.call(this);
 	},
 	
 	destroy: function(target) {
 		this.wrapper.remove();
 		this.element.unbind(eventNamespace).css({ width: this.oWidth, marginRight: this.oMargin });
 		
-		$.widget.prototype.destroy.call(this);
+		$.Widget.prototype.destroy.call(this);
 	}	
-});
-
-spinner = $.extend($.ui.spinner, {
-	version: '1.11',
-	getter: 'value',
-	defaults: {
-		min: null,
-		max: null,
-		allowNull: false,
-		
-		group: '',
-		point: '.',
-		prefix: '',
-		suffix: '',
-		places: null, // null causes it to detect the number of places in step
-		
-		defaultStep: 1, // real value is 'step', and should be passed as such.  This value is used to detect if passed value should override HTML5 attribute
-		largeStep: 10,
-		mouseWheel: true,
-		increment: 'slow',		
-		className: null,
-		showOn: 'always',
-		width: 16,
-		upIconClass: "ui-icon-triangle-1-n",
-		downIconClass: "ui-icon-triangle-1-s",
-		
-		format: function(num, places) {
-			var options = this,
-				regex = /(\d+)(\d{3})/,
-				result = ((isNaN(num) ? 0 : Math.abs(num)).toFixed(places)) + '';
-				
-			for (result = result.replace('.', options.point); regex.test(result) && options.group; result=result.replace(regex, '$1'+options.group+'$2')) {};
-			return (num < 0 ? '-' : '') + options.prefix + result + options.suffix;
-		},
-		
-		parse: function(val) {
-			var options = this;
-			
-			if (options.group == '.')
-				val = val.replace('.', '');
-			if (options.point != '.')
-				val = val.replace(options.point, '.');
-			return parseFloat(val.replace(/[^0-9\-\.]/g, ''));
-		}
-	}
 });
 
 })( jQuery );
