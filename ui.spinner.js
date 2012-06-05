@@ -452,6 +452,12 @@ $.widget('ui.spinner', {
 	},
 		
 	_mouseWheel: function(e) {
+		// The wheel data is not added to the jquery event as for jquery 1.7
+		// see http://bugs.jquery.com/ticket/10676
+		if( typeof e.wheelDelta=="undefined" && typeof e.detail=="undefined" ) {
+			e = e.originalEvent;
+		}
+
 		var self = $.data(this, 'spinner');
 		if (!self.options.disabled && self.focused && (focusCtrl === self)) {
 			// make sure changes are posted
