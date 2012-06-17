@@ -150,10 +150,10 @@ Example Option Usage
 ---------------------
 
 0 - 100 incrementing by 2:
-	$("#myinput").spinner({min: 0, max: 100, increment: 2});
+	`$("#myinput").spinner({min: 0, max: 100, increment: 2});`
 	
 Show on hover/focus only:
-	$("#myinput").spinner({showOn: 'both'});
+	`$("#myinput").spinner({showOn: 'both'});`
 	
 Other Commands
 ---------------
@@ -161,33 +161,33 @@ Other Commands
 The spinner also support commands after they are created, using the standard UI widget method
 of passing strings.
 
-$("#myinput").spinner("value")
+`$("#myinput").spinner("value")`  
 	Returns the integer value of the input.  Returns null if the input is blank.
 	
-$("#myinput").spinner("value", value)
+`$("#myinput").spinner("value", value)`  
 	Sets the integer value of the input.  Still validates against min and max, null blanks the
 	input if nulls are allowed.
 	
-$("#myinput").spinner("enable")
+`$("#myinput").spinner("enable")`  
 	Enables the spinner and the input
 	
-$("#myinput").spinner("disable")
+`$("#myinput").spinner("disable")`  
 	Disables the spinner and the input
 	
-$("#myinput").spinner("destroy")
+`$("#myinput").spinner("destroy")`  
 	Destroys the spinner, restoring the input to its previous state
 	
-$("#myinput").spinner("increment")
+`$("#myinput").spinner("increment")`  
 	Increments the spinner, just like you hit the button
 	
-$("#myinput").spinner("decrement")
+`$("#myinput").spinner("decrement")`  
 	Decrements the spinner, just like you hit the button
 
-$("#myinput").spinner("showButtons", [immediate])
+`$("#myinput").spinner("showButtons", [immediate])`  
 	Shows the buttons if they are hidden.  If immediate is passed as true, the show won't be
 	animated.
 	
-$("#myinput").spinner("hideButtons", [immediate])
+`$("#myinput").spinner("hideButtons", [immediate])`  
 	Hides the buttons if they are visible.  If immediate is passed as true, the hide won't be
 	animated.
 	
