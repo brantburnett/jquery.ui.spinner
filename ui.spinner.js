@@ -39,6 +39,7 @@ var
 	
 $.widget('ui.spinner', {
 	options: {
+		wrapper:'span',
 		min: null,
 		max: null,
 		allowNull: false,
@@ -124,7 +125,7 @@ $.widget('ui.spinner', {
 			rightMargin = self.oMargin = getMargin(input.css('margin-right')), // store original width and right margin for later destroy
 			wrapper = self.wrapper = input.css({ width: (self.oWidth = (box ? input.width() : input.outerWidth())) - buttonWidth, 
 												 marginRight: rightMargin + buttonWidth, textAlign: 'right' })
-				.after('<span class="ui-spinner ui-widget"></span>').next(),
+				.after('<' + options.wrapper + ' class="ui-spinner ui-widget"></' + options.wrapper + '>').next(),
 			btnContainer = self.btnContainer = $(
 				'<div class="ui-spinner-buttons">' + 
 					'<div class="ui-spinner-up ui-spinner-button ui-state-default ui-corner-tr"><span class="ui-icon '+options.upIconClass+'">&nbsp;</span></div>' + 
